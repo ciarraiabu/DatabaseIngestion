@@ -1,0 +1,43 @@
+from faker import Faker
+import random
+from random import randint
+from random import choice
+import time
+from neo4j import GraphDatabase
+
+driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "antoin"))
+
+cql = "MATCH (d:origin)<-[:HOMEPLACE]-(b:personalDetails), (d:origin)-[:ADDRESS]->(e:residence) RETURN d, [(b)-[:INDIVIDUAL]->(:Name {surname: 'Clarke'})], [(b)-[:HOMEPLACE]->(:origin)], [(d)-[:ADDRESS]->(:residence {diocese: 'Meath'})] LIMIT 1"
+cqlu="MATCH (n) WHERE c.surname = 'Clarke' SET e.diocese = 'Meath'"
+cql1="MATCH (e) WHERE ID(e) = 24 RETURN e"
+
+
+def brockGraph(tx, forename, surname, diocese, province, country, gender, notes, course, achieved, date, institutionName, address):
+    tx.run("MERGE (a:Person)-[:DESCRIPTION]-(b:personalDetails)-[:INDIVIDUAL]->(c:Name {forename: $forename, surname: $surname})"
+"MERGE (b)-[:HOMEPLACE]->(d:origin)"
+"MERGE (d)-[:ADDRESS]->(e:residence {diocese: $diocese, province: $province, country: $country})" "MERGE (b)-[:ATTRIBUTE]->(f:gender {gender: $gender})" "MERGE (a)-[:EXTRAINFO]->(g:Notes {notes: $notes})" "MERGE (a)-[:STUDIES]->(h:education)" "MERGE (h)-[:QUALIFIED]->(i:Qualification {course: $course, achieved: $achieved, date: $date})" "MERGE (h)-[:QUALIFIED]->(j:Institute {institutionName: $institutionName, address: $address})", forename=forename, surname=surname, diocese=diocese, province=province, country=country, gender=gender, notes=notes, course=course, achieved=achieved, date=date, institutionName=institutionName, address=address)
+
+faker = Faker()
+# dictionary
+#brocklissferte_data ={}
+forename =['Dionysius', 'John', 'Michael', 'Thomas', 'Cornelius', 'Ciaran', 'Kieran', 'Gerard', 'Henry', 'Daniel', 'Sean', 'Sean', 'Liam', 'David', 'Dominic', 'Ciar']
+surname =['McCarthy', 'Healy', 'O Beirne', 'Stapleton', 'O Leary', 'Ruane', 'O Connor', 'Clarke', 'Howard', 'Williams', 'Ratigan', 'Flynn']
+diocese  = ['Carlow', 'Dublin', 'Wexford', 'Wicklow', 'Louth', 'Kildare', 'Meath', 'Westmeath', 'Kilkenny', 'Laois', 'Offaly', 'Longford', 'Clare', 'Cork', 'Kerry','Limerick', 'Tipperary', 'Waterford', 'Galway','Leitrim', 'Mayo', 'Roscommon', 'Sligo', 'Cavan', 'Donegal', 'Monaghan', 'Antrim', 'Armagh', 'Down', 'Derry', 'Fermanagh', 'Tyrone']
+province = ['Connaught', 'Leinster', 'Munster', 'Ulster']
+course = ['received the four minor orders','Arts', 'Clergy', 'Law']
+institution = ['University Of Paris', 'University Of Brussels', 'Univerity Of Belgium']
+address = ['Paris', 'Brussels', 'Liege']
+country = ['France', 'Belgium']
+
+start = time.time()
+with driver.session() as session:
+      #for i in range(1, 100):
+              #session.write_transaction(brockGraph, random.choice(forename), random.choice(surname), random.choice(diocese), random.choice(province), "Ireland", "Male", 
+               #"Boyle 'St. Nic.’, p. 490; Boyle, I.C.P.", random.choice(course), choice(['yes', 'no']), str(faker.date_time_between(start_date='-300y', end_date='-250y')), 
+               #random.choice(institution), random.choice (address))
+      nodes = session.run(cql1)
+      #nodes = session.run(cqlu)
+      for node in nodes:
+             print(node)      
+end = time.time()
+print(end - start)
