@@ -1,0 +1,88 @@
+from faker import Faker
+import random
+import json            # To create a json file
+from pymongo import MongoClient
+from random import randint
+from random import choice
+import time
+
+#Step 1: Connect to MongoDB 
+client = MongoClient(port=27018)
+db=client.brocklissferte
+
+#Step 2: Create sample data
+#def input_data(x):
+
+    
+faker = Faker()
+# dictionary
+#brocklissferte_data ={}
+forename =['Dionysius', 'John', 'Michael', 'Thomas', 'Cornelius', 'Ciaran', 'Kieran', 'Gerard', 'Henry', 'Daniel', 'Sean', 'Sean', 'Liam', 'David', 'Dominic', 'Ciar']
+surname =['McCarthy', 'Healy', 'O Beirne', 'Stapleton', 'O Leary', 'Ruane', 'O Connor', 'Clarke', 'Howard', 'Williams', 'Ratigan', 'Flynn']
+county  = ['Carlow', 'Dublin', 'Wexford', 'Wicklow', 'Louth', 'Kildare', 'Meath', 'Westmeath', 'Kilkenny', 'Laois', 'Offaly', 'Longford', 'Clare', 'Cork', 'Kerry','Limerick', 'Tipperary', 'Waterford', 'Galway','Leitrim', 'Mayo' 'Roscommon', 'Sligo', 'Cavan', 'Donegal', 'Monaghan', 'Antrim', 'Armagh', 'Down', 'Derry', 'Fermanagh', 'Tyrone']
+province =['Connaught', 'Leinster', 'Munster', 'Ulster']
+course = ['received the four minor orders','Arts', 'Clergy', 'Law']
+institution = ['University Of Paris', 'University Of Brussels', 'Univerity Of Belgium']
+town = ['Paris', 'Brussels', 'Liege']
+country = ['France', 'Belgium']
+
+start = time.time()
+#a for loop which creates records of synthesized data
+for x in range(1, 100):
+    person = {
+    "id" : randint(1, 1000000),
+    "name" : ({
+           "forename" : random.choice(forename), 
+           "surname" : random.choice(surname)
+            }),
+    "gender" : "male",
+    "origin" : ({ 
+           "residence" :({
+                   "diocese" : random.choice(county), 
+                   "province" : random.choice(province), 
+                   "country" : "Ireland" 
+           })
+       }),
+    "education" : ({ 
+           "qualification" : ({
+                   "course" : random.choice(course), 
+                   "achieved" : choice(['yes', 'no']), 
+                   "date" : str(faker.date_time_between(start_date='-300y', end_date='-250y'))
+                   }),
+           "institution" : random.choice(institution), 
+           "address" : ({ "town" : random.choice(town), "country" : random.choice(country)})}),
+    }
+
+#Step 3: Insert brocklissferte object directly into MongoDB via insert_one
+    result=db.brocklissferte.insert_one(person)
+#Step 4: Print to the console the ObjectID of the new document
+#print('Created {0} of 100 as {1}'.format(x, result.inserted_id))
+end = time.time()
+print(end - start)
+    
+
+#print(brocklissferte_data)
+
+        # dictionary dumped as json in a json file
+        #with open('brocklissferte.json', 'w') as fp:
+             #json.dump(brocklissferte_data, fp)
+
+#Step 5: Tell us that you are done
+print('finished creating 1000 records')
+start = time.time()
+print('Records of students who originate in Wexford:')
+origin = db.brocklissferte.find_one({"origin.residence.diocese" : "Wexford" })
+print(origin)
+end = time.time()
+print(end - start)
+
+#db.brocklissferte.drop()
+modify = db.brocklissferte.update_one({'id' : origin.get('id') }, {'$set': {"occupationalHistory": ({"occupation": "Cleric", "role": "Priest"})}})
+#print('Number of documents modified : ' + str(result.modified_count))
+
+#def main():
+
+    # Enter number of students
+    #number_of_students = 100  # For the above task make this 100
+    #input_data(number_of_students)
+    #main()
